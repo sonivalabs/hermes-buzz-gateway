@@ -8,7 +8,7 @@ key, ID, address, or path on any machine.**
 
 ## What we're building
 
-- A Hermes profile `hf-downloader` whose only job is to `huggingface-cli download`
+- A Hermes profile `hf-downloader` whose only job is to `hf download`
   models into a local `<LLMS_ROOT>`.
 - It watches **exactly one** Buzz channel (`LLM Downloads`) — no other channels.
 - It uses the same LLM as your other agents (here a local OpenAI-compatible
@@ -50,7 +50,12 @@ Repo: <LLMS_ROOT>/<VENDOR-or-SHORT-NAME>/<model-name-or-rev>/
 
 - Confirm model ID, revision, target dir, and flags before large downloads.
 - NEVER print or pass the token on the command line; rely on $HF_TOKEN / the
-  HF cache token. huggingface-cli reads it automatically.
+  HF cache token. `hf` reads it automatically.
+- USE the modern `hf` CLI (`hf download <repo> --local-dir ...`).
+  `huggingface-cli` is DEPRECATED and no longer works — never call it.
+- If `hf` is missing, report it / install `huggingface_hub` (into the agent's
+  venv) — do NOT install/use a web browser to "research" a model.
+  Browsing is never a substitute for the download.
 - Prefer resumable, non-interactive downloads; safetensors over .bin; keep
   GGUF quant filters explicit (--include).
 - Check disk (`df -h <LLMS_ROOT>`) first; confirm if the model is large.
@@ -146,10 +151,21 @@ download → report command, size, and load line — all without echoing its tok
 
 - **Single-channel scope is the point.** Only ever set `BUZZ_CHANNELS` to the
   channel you want it to see.
-- **HF auth:** `huggingface-cli`/`huggingface_hub` read `HF_TOKEN` and the
-  `~/.cache/huggingface/token` file automatically — you rarely need `-token`,
-  and passing it on argv is how tokens leak. See the review notes in
-  `docs/troubleshooting.md` (the argv finding).
+- **HF auth:** `hf`/`huggingface_hub` read `HF_TOKEN` and the
+  `~/.cache/huggingface/token` file automatically — you rarely need a token flag,
+  and passing one on argv is how tokens leak (see the argv finding in
+  `docs/troubleshooting.md`).
+- **`huggingface-cli` is deprecated — it is a dead end.** It only prints
+  "use `hf` instead" and exits. The persona must call `hf download`.
+- **Ensure `hf` is actually on the agent's PATH.** The agent's sandboxed
+  terminal may not see `~/.local/bin` and its python may lack `huggingface_hub`.
+  Fix: install it into the Hermes venv the agent runs from:
+  `HERMES_VENV/bin/pip install --upgrade huggingface_hub` (puts `hf` in
+  `HERMES_VENV/bin/hf`). Without this, every download fails silently and the
+  model may invent an off-task fallback (seen in practice: it installed a
+  browser to browse a model card instead of downloading). Add a persona rule:
+  *if the tool is missing, report/install — never install a browser to research
+  a model.*
 - **Safetensors vs .bin**, **GGUF quant filtering**, and **gated repos** are the
   three things users most often mis-request; the persona covers all three.
 - **Disk:** warn/confirm on models bigger than free space. Add a cap if you want

@@ -53,6 +53,11 @@ Real problems hit while bringing this up from scratch, each with the root cause 
 ## T11 — Relay under systemd must load `.env`
 - When running `buzz-relay` under systemd, the launch script must **source the project `.env`** (`set -a; source .env; set +a`) so `BUZZ_HEALTH_PORT`, DB, and Redis vars load.
 
+## T12 — Agent tool missing on its sandboxed PATH (e.g. `huggingface-cli`/`hf`)
+- **Symptom:** a gateway agent that should run a CLI tool reports it "not found" and silently pivots to an off-task fallback — the real pattern seen was an HF-downloader installing a **browser** to "research" a model instead of downloading it.
+- **Root cause:** `huggingface-cli` is **deprecated and no longer works** (prints "use `hf` instead"), AND the agent's sandboxed terminal PATH doesn't include the user's `~/.local/bin`, and its python lacks the needed module — so the real tool wasn't reachable.
+- **Fix:** (1) target the modern CLI (`hf download ...`), (2) install the dependency into the Hermes venv the agent runs from (`<HERMES_VENV>/bin/pip install --upgrade huggingface_hub`), which drops `hf` into `<HERMES_VENV>/bin/hf` on the agent's PATH, and (3) add a persona rule: *if the tool is missing, report/install it — never install a browser to research a model.*
+
 ---
 
 ## Optional: reply-in-own-thread dispatcher  (⚠️ REMOVED — do not reintroduce)
