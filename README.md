@@ -1,6 +1,8 @@
-# Hermes Agent in Buzz — Native Gateway Method
+# Hermes Agent in Buzz — Native Gateway Method 🐝
 
 Connect a **Hermes Agent** profile to a self-hosted **Buzz** workspace as a first-class messaging **gateway platform** (the deepest of Hermes' three Buzz integrations). The agent joins channels, responds to messages and threads through its own local LLM, and runs persistently under systemd.
+
+> 🧪 Includes a ready-to-copy **HF-downloader agent example** (`docs/example-hf-downloader.md`) — a full, sanitized walkthrough for spinning up a dedicated, one-channel model-downloader agent from this same playbook.
 
 > This is a **sanitized, reusable template**. All IPs, keys, pubkeys, tokens, and channel IDs are placeholders — substitute your own.
 
