@@ -4,7 +4,9 @@
 #
 #   ./scripts/scan.sh
 #
-# Exits non-zero if anything sensitive-looking is found.
+# NOTE: scans the WORKING TREE only. It cannot see secrets committed earlier
+# and later deleted — rotate any key that was ever committed, and consider the
+# CI workflow (gitleaks with --uncommitted) for history scanning.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -14,10 +16,21 @@ patterns=(
   '[a-f0-9]{64}'
   'BEGIN (RSA|OPENSSH|EC|PGP) PRIVATE'
   '"Bearer [A-Za-z0-9._-]{20,}'
+  # GitHub tokens
+  'gh[pousr]_[A-Za-z0-9]{30,}'
+  'github_pat_[A-Za-z0-9_]{30,}'
+  # AWS access key id
+  'AKIA[0-9A-Z]{16}'
+  # OpenAI / generic sk-
+  'sk-[A-Za-z0-9]{20,}'
+  # Slack
+  'xox[abprs]-[A-Za-z0-9-]{20,}'
+  # Google / generic service-account style
+  '(AIza[0-9A-Za-z_-]{20,})'
 )
 
-# Pattern that must produce NO hits (use GNU-agnostic grep)
-grep_or_pp() { grep -rInE "$1" . --exclude-dir=.git --exclude=scan.sh 2>/dev/null || true; }
+# PATTERNS that must produce NO hits (exclude .git so we don't flag our own refs)
+grep_or_pp() { grep -rInE "$1" . --exclude-dir=.git --exclude-dir=target 2>/dev/null || true; }
 
 rc=0
 for p in "${patterns[@]}"; do
@@ -29,7 +42,7 @@ for p in "${patterns[@]}"; do
   fi
 done
 
-# Literal IPs (but allow <HOST> style placeholders)
+# Literal IPs (allow placeholders like <HOST>)
 iphits="$(grep_or_pp '\b([0-9]{1,3}\.){3}[0-9]{1,3}\b')"
 if [[ -n "$iphits" ]]; then
   echo "::error::Literal IP found (use <HOST/RELAY_HOST> placeholders):"

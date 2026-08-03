@@ -3,7 +3,9 @@
 ## Reporting a vulnerability
 
 If you find a security issue (in this template, Hermes, or Buzz), please **do not**
-open a public issue. Report privately to the maintainer by email, and include:
+open a public issue. Report privately via **GitHub Private Vulnerability
+Reporting** (Repo → Security tab → "Report a vulnerability") once this repo is
+made public, or to the maintainer's published contact address. Include:
 
 - Affected file / docs section
 - A minimal reproduction
@@ -40,5 +42,8 @@ The deployment this template describes should follow the baseline posture below:
 
 ## Secret scan
 
-Keep the repo leak-free. Run `./scripts/scan.sh` before commits, and rely on the
-GitHub Actions `secrets-scan` workflow (gitleaks + placeholder guard) in CI.
+Keep the repo leak-free. Run `./scripts/scan.sh` before commits. If the GitHub
+Actions `secrets-scan` workflow is present/enabled in this repo, it enforces the
+same checks (gitleaks + placeholder guard) in CI; if not present, rely on the
+local `scan.sh` and review diffs manually. (The workflow file must be added with
+a token that has the GitHub `workflow` scope.)

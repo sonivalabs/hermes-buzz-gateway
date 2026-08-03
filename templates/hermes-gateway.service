@@ -14,5 +14,21 @@ Restart=on-failure
 RestartSec=15
 TimeoutStopSec=30
 
+# --- Hardening --------------------------------------------------------------
+# This process turns LLM output into actions on chat input, so shrink the blast
+# radius. ProtectHome is intentionally NOT read-only/strict: the gateway must
+# WRITE its profile (state DB, sessions, memory) under $HOME. ProtectSystem=full
+# still read-only-mounts /usr, /boot and /etc for it.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictNamespaces=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+LockPersonality=true
+UMask=0077
+
 [Install]
 WantedBy=multi-user.target

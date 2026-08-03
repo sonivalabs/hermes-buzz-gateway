@@ -57,8 +57,7 @@ hermes-buzz-gateway/
 │   └── troubleshooting.md     # issues faced + resolutions
 ├── templates/
 │   ├── env.example            # sanitized profile .env
-│   ├── hermes-gateway.service # systemd unit
-│   └── buzz-gateway.patch     # optional adapter + CLI improvements
+│   └── hermes-gateway.service # hardened systemd unit
 ├── LICENSE                    # Apache-2.0
 └── .gitignore
 ```

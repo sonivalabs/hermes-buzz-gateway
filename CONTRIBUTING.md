@@ -27,7 +27,9 @@ Thanks for helping keep this template clean and reusable. The one hard rule:
    git commit -s -m "docs: add T12, WebSocket stale-subscription retry"
    ```
 
-6. Open a pull request. CI (secret scan + placeholder guard) must pass.
+6. Open a pull request. If the CI `secrets-scan` workflow is present it must pass;
+   if it hasn't been added yet (it needs a GitHub `workflow`-scoped token), run
+   `./scripts/scan.sh` locally to confirm no leaks.
 
 ## What kind of change helps
 

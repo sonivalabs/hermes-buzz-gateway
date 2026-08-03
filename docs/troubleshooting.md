@@ -55,10 +55,17 @@ Real problems hit while bringing this up from scratch, each with the root cause 
 
 ---
 
-## Optional: reply-in-own-thread dispatcher
+## Optional: reply-in-own-thread dispatcher  (⚠️ REMOVED — do not reintroduce)
 
-If you keep the agent in **shared** channels (can't fully scope channels) and want it to continue its *own* threads but not reply to everything:
-- Track the agent's own published message ids (`_own_message_ids` set).
-- Dispatch an inbound event when its `e`-tag references one of those ids, or when `_is_mentioned(content)`, or a DM.
+An early attempt let the agent continue its own threads in shared channels by
+tracking its own message ids and dispatching when an inbound event's `e`-tag
+referenced one. **This was removed: the `e` tag is attacker-controlled input**
+(message ids are public to every channel member), so anyone could forge a reply
+pointing at the agent's own message to force dispatch and bypass
+`BUZZ_REQUIRE_MENTION=true` — precisely the untrusted, shared-channel case where
+it would be recommended.
 
-See `templates/buzz-gateway.patch` for a reference patch (applies to `.../plugins/platforms/buzz/adapter.py`). Prefer the simpler `BUZZ_CHANNELS` scoping when you can.
+**Do NOT reintroduce an e-tag-based dispatch bypass.** The supported, safe way to
+let the agent "chat in its own threads without @" is the simple config:
+`BUZZ_REQUIRE_MENTION=false` **+** `BUZZ_CHANNELS` scoped to agent-only channels
+(the T6 "final fix"). That needs no adapter patching and has no authz bypass.
