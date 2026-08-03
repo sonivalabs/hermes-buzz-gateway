@@ -54,7 +54,8 @@ hermes-buzz-gateway/
 │   ├── architecture.md        # ③ gateway deep-dive
 │   ├── setup.md               # step-by-step end-to-end
 │   ├── config-reference.md    # env var reference
-│   └── troubleshooting.md     # issues faced + resolutions
+│   ├── troubleshooting.md     # issues faced + resolutions
+│   └── example-hf-downloader.md # build a one-channel HF-downloader agent
 ├── templates/
 │   ├── env.example            # sanitized profile .env
 │   └── hermes-gateway.service # hardened systemd unit
