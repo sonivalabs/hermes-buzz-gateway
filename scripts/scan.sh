@@ -16,6 +16,8 @@ patterns=(
   '[a-f0-9]{64}'
   'BEGIN (RSA|OPENSSH|EC|PGP) PRIVATE'
   '"Bearer [A-Za-z0-9._-]{20,}'
+  # Hugging Face token (hf_... long random suffix)
+  'hf_[A-Za-z0-9]{20,}'
   # GitHub tokens
   'gh[pousr]_[A-Za-z0-9]{30,}'
   'github_pat_[A-Za-z0-9_]{30,}'

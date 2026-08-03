@@ -21,15 +21,27 @@ Everything lives in the Hermes profile `.env` (`~/.hermes/profiles/<profile>/.en
 
 ### `BUZZ_ALLOWED_USERS` gates DISPATCH, not just mentions
 
-On this adapter the allow-list is enforced in `_handle_event()` **before mention
-resolution**: if the message sender's pubkey is not in the allow-list, the event is
-**dropped entirely** — it cannot trigger the agent, with or without a mention. The
-same check is also applied centrally by the gateway. So:
+Enforcement (verified against the adapter in this Hermes release): only a sender
+whose normalized pubkey is in `BUZZ_ALLOWED_USERS` reaches `_dispatch_message`.
+Non-listed senders are dropped — with or without a mention — so a stranger cannot
+trigger the agent even if `BUZZ_REQUIRE_MENTION=false`.
 
-- `BUZZ_ALLOWED_USERS=<you>` + `BUZZ_ALLOW_ALL_USERS=false` = only you can ever
-trigger the agent, regardless of `BUZZ_REQUIRE_MENTION`.
-- This is the primary control for the prompt-injection surface described below.
-- Always key it on **hex pubkeys**, never display names (names are spoofable).
+Two implementation details to know:
+- **There are two allow-list layers.** The adapter checks `_allowed_pubkeys`;
+  the *gateway* also applies `BUZZ_ALLOWED_USERS`/`BUZZ_ALLOW_ALL_USERS`
+  centrally. Treat the pair as one gate, but know both exist.
+- **Empty list = no adapter filter.** If `BUZZ_ALLOWED_USERS` is empty, the
+  adapter's check is skipped and only the gateway-central check (and
+  `BUZZ_ALLOW_ALL_USERS`) apply.
+- **Version caveat — re-verify before relying on this.** The allow-list check
+  currently sits *after* the mention gate but still *before* dispatch, so its
+  effect (can't trigger) doesn't depend on that ordering. But check ordering
+  and path are implementation details that can move on a Hermes upgrade.
+  Grep `_allowed_pubkeys` / `BUZZ_ALLOWED_USERS` in
+  `plugins/platforms/buzz/adapter.py` to reconfirm before you depend on it.
+
+Always key it on **hex pubkeys**, never display names (names are spoofable). This
+is the primary control for the prompt-injection surface described below.
 
 ### `BUZZ_REQUIRE_MENTION=false` is a wide-open surface
 
