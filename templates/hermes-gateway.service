@@ -1,0 +1,18 @@
+[Unit]
+Description=Hermes Gateway (Buzz platform — native gateway integration)
+After=network-online.target buzz-relay.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=<USER>
+Group=<GROUP>
+Environment=HERMES_HOME=/home/<USER>/.hermes/profiles/<PROFILE>
+WorkingDirectory=<BUZZ_CHECKOUT_DIR>
+ExecStart=<HERMES_VENV>/bin/python -m hermes_cli.main -p <PROFILE> gateway run
+Restart=on-failure
+RestartSec=15
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

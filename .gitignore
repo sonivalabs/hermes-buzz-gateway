@@ -1,0 +1,11 @@
+# secrets / runtime
+.env
+*.pem
+*credentials*.json
+
+# build artifacts
+/target/
+target/
+node_modules/
+__pycache__/
+*.pyc
