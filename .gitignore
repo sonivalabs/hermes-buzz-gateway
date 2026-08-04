@@ -1,5 +1,8 @@
 # secrets / runtime
 .env
+.env.*
+*.env
+!templates/env.example
 *.pem
 *credentials*.json
 

@@ -29,6 +29,8 @@ patterns=(
   'xox[abprs]-[A-Za-z0-9-]{20,}'
   # Google / generic service-account style
   '(AIza[0-9A-Za-z_-]{20,})'
+  # UUIDs (channel / community / DM ids are version-4 UUIDs)
+  '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}'
 )
 
 # PATTERNS that must produce NO hits (exclude .git so we don't flag our own refs)
@@ -49,6 +51,15 @@ iphits="$(grep_or_pp '\b([0-9]{1,3}\.){3}[0-9]{1,3}\b')"
 if [[ -n "$iphits" ]]; then
   echo "::error::Literal IP found (use <HOST/RELAY_HOST> placeholders):"
   echo "$iphits"
+  rc=1
+fi
+
+# Real hostnames / non-placeholder relay URLs (must reference a <PLACEHOLDER> or localhost)
+# Allow public doc/license domains that legitimately appear; flag everything else.
+host_hits="$(grep -rInE 'https?://([^/<][A-Za-z0-9.-]*)\.([a-z]{2,})' . --exclude-dir=.git --exclude-dir=target 2>/dev/null | grep -viE 'https?://<|https?://localhost|apache\.org|nousresearch\.com|github\.com|nostr-protocol\.github\.io' || true)"
+if [[ -n "$host_hits" ]]; then
+  echo "::error::Non-placeholder hostname found (use <HOST>/<RELAY_HOST> placeholders):"
+  echo "$host_hits"
   rc=1
 fi
 

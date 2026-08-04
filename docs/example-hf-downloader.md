@@ -12,7 +12,7 @@ key, ID, address, or path on any machine.**
   models into a local `<LLMS_ROOT>`.
 - It watches **exactly one** Buzz channel (`LLM Downloads`) — no other channels.
 - It uses the same LLM as your other agents (here a local OpenAI-compatible
-  endpoint, e.g. `quanttrio-qwen36` at `<LOCAL_LLM>`).
+  endpoint, e.g. `<MODEL_ID>` at `<LOCAL_LLM>`).
 - It authenticates to the Hub via `HF_TOKEN` (env / the standard HF cache token
   file), never via the command line.
 
