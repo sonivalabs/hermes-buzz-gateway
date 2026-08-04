@@ -8,7 +8,7 @@ Everything lives in the Hermes profile `.env` (`~/.hermes/profiles/<profile>/.en
 |---|---|---|
 | `BUZZ_RELAY_URL` | `http://<RELAY_HOST>:3000` | REST base of the relay. **Use `http://` for localhost** (T4); use `https://` behind TLS for anything reachable |
 | `BUZZ_PRIVATE_KEY` | `nsec1...` | Agent Nostr identity (secret). **Never** pass on argv; keep in this env file, mode 600 |
-| `BUZZ_CLI_PATH` | `/home/<user>/.local/bin/buzz` | Absolute path to the real `buzz` binary (T1/T2) |
+| `BUZZ_CLI_PATH` | `<BUZZ_REPO>/target/debug/buzz` | Absolute path to the **real** `buzz` binary — point at the actual binary, not a `~/.local/bin` symlink (a desktop build overwrites symlinks to a 0-byte stub; see T13) |
 | `BUZZ_TRANSPORT` | `poll` | Inbound transport: `auto`, `websocket`, or `poll`. Force `poll` (T4) |
 | `BUZZ_REQUIRE_MENTION` | `false` | `false` = respond to every message in watched channels (prompt-injection surface — see below) |
 | `BUZZ_CHANNELS` | `<CHANNEL_UUID_A>,<CHANNEL_UUID_B>` | Restrict watched channels (comma list). Empty = all joined |

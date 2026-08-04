@@ -58,6 +58,16 @@ Real problems hit while bringing this up from scratch, each with the root cause 
 - **Root cause:** `huggingface-cli` is **deprecated and no longer works** (prints "use `hf` instead"), AND the agent's sandboxed terminal PATH doesn't include the user's `~/.local/bin`, and its python lacks the needed module — so the real tool wasn't reachable.
 - **Fix:** (1) target the modern CLI (`hf download ...`), (2) install the dependency into the Hermes venv the agent runs from (`<HERMES_VENV>/bin/pip install --upgrade huggingface_hub`), which drops `hf` into `<HERMES_VENV>/bin/hf` on the agent's PATH, and (3) add a persona rule: *if the tool is missing, report/install it — never install a browser to research a model.*
 
+## T13 — Agents go silent: the `buzz` binary is a non-executable stub
+- **Symptom:** gateway agents are `connected` but never respond; logs show repeated `PermissionError: [Errno 13] Permission denied: '<...>/buzz'` and `WARNING: Buzz: poll sweep failed`.
+- **Root cause:** `BUZZ_CLI_PATH` pointed at `~/.local/bin/buzz`, a symlink. The **desktop Tauri build overwrote that symlink** to its 0-byte sidecar stub (`desktop/src-tauri/target/debug/buzz`, mode `-rw-rw-r--`, size 0). The gateways then tried to execute a non-executable stub → every poll sweep failed → nothing dispatched.
+- **Fix (robust):** set `BUZZ_CLI_PATH` in each profile `.env` to the **direct path of the real CLI binary** (e.g. `<BUZZ_REPO>/target/debug/buzz`), NOT a symlink that a build can hijack. Verify with `test -x "$BUZZ_CLI_PATH"`. After any desktop build, re-check it.
+
+## T14 — "Context length exceeded / Max compression attempts (3) reached"
+- **Symptom:** a gateway agent's turn fails with a 400 and, after 3 compression retries, `❌ Max compression attempts (3) reached.`
+- **Root cause (subtle):** the model API rejects when **input_tokens + requested output_tokens > context_window**. If `model.max_tokens` is unset (`None`), the agent requests an unbounded (~full-window) output budget, so a long but not enormous channel history already overflows. Input compression **cannot fix it** — compression only shrinks *input*, while the overflowing half is the *output request*.
+- **Fix:** cap the output budget: `model.max_tokens: <N>` in the profile `config.yaml` (e.g. `8192`–`16384`). Verifies as `input + max_tokens < context_length`. Optionally also lower `compression.threshold` (e.g. `0.6`) so history compacts earlier, but the output cap is the actual fix. Then `/new` or `/compress` to reset the bloated session.
+
 ---
 
 ## Optional: reply-in-own-thread dispatcher  (⚠️ REMOVED — do not reintroduce)
